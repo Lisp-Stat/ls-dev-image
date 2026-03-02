@@ -31,7 +31,7 @@ this pre-built image to get fast container startup (no feature install phase):
 ## Run locally
 
 ```sh
-docker run --rm -it ghcr.io/lisp-stat/ls-dev:latest sbcl
+docker run --rm -it --user vscode ghcr.io/lisp-stat/ls-dev:latest sbcl
 ```
 
 ## Building the image
@@ -55,9 +55,6 @@ devcontainer build --workspace-folder . --image-name ghcr.io/lisp-stat/ls-dev:la
 The GitHub Actions workflow in `.github/workflows/publish.yml` builds and pushes
 the image automatically on every push to `main` and on version tags (`v*`).
 
-To make the package publicly accessible after the first push, go to the GitHub
-package settings for `ghcr.io/lisp-stat/ls-dev` and set visibility to **Public**.
-
 ## Versioning
 
 | Tag | Description |
@@ -70,6 +67,68 @@ package settings for `ghcr.io/lisp-stat/ls-dev` and set visibility to **Public**
 This image bundles **OpenBLAS**. An Intel MKL variant can be produced by
 creating a second `devcontainer.json` (e.g. in `.devcontainer-mkl/`) with
 `"blas": "intel-mkl"` and tagging the resulting image `ls-dev:latest-mkl`.
+
+## Developer Workflow
+
+### Out of the box
+
+The upstream Lisp-Stat repositories are pre-cloned into
+`~/quicklisp/local-projects/` during the image build. SBCL and Lisp-Stat work
+immediately with no setup required:
+
+```sh
+sbcl --eval "(ql:quickload :lisp-stat)" --eval "(quit)"
+```
+
+The repos are read-only copies of the upstream Lisp-Stat organisation. They are
+sufficient for using and exploring Lisp-Stat, but you cannot push changes to them.
+
+### Setting up a contributor workspace
+
+When you are ready to contribute, authenticate with GitHub and run `ls-fork`:
+
+```sh
+gh auth login
+ls-fork
+```
+
+`ls-fork` does the following for every repo in `~/quicklisp/local-projects/`:
+
+1. Forks the repo to your GitHub account (via `gh repo fork`)
+2. Clones your fork to `/workspaces/lisp-stat/<repo>` — this is a host bind
+   mount that **persists across container rebuilds**
+3. Adds an `upstream` remote pointing back to the Lisp-Stat origin
+4. Replaces the in-container `~/quicklisp/local-projects/<repo>` directory with
+   a symlink to the new host-mount clone
+
+After running `ls-fork`:
+
+| Location | Remote | Purpose |
+|---|---|---|
+| `/workspaces/lisp-stat/<repo>` | `origin` → your fork | Push your changes here |
+| `/workspaces/lisp-stat/<repo>` | `upstream` → Lisp-Stat | Fetch official updates |
+| `~/quicklisp/local-projects/<repo>` | symlink → above | SBCL/Quicklisp load path |
+
+`ls-fork` is idempotent — repos already present in `/workspaces/lisp-stat/` are
+skipped, so it is safe to re-run if the process is interrupted.
+
+### Keeping your forks up to date
+
+```sh
+cd /workspaces/lisp-stat/<repo>
+git fetch upstream
+git merge upstream/master
+```
+
+Or for all repos at once:
+
+```sh
+for repo in /workspaces/lisp-stat/*/; do
+  echo "Updating $(basename $repo)..."
+  git -C "$repo" fetch upstream
+  git -C "$repo" merge upstream/master
+done
+```
 
 ## Resources
 
