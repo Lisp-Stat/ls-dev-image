@@ -34,7 +34,14 @@ this pre-built image to get fast container startup (no feature install phase):
 docker run --rm -it --user vscode -w /home/vscode ghcr.io/lisp-stat/ls-dev:latest ls-repl
 ```
 
-This will give you a Common Lisp REPL with Lisp-Stat loaded.  If you want to edit files with emacs, exit the REPL (use Ctrl-d) and then type `emacs`.  Once running, type `M-x slime` to load the development environment.
+This will give you a Common Lisp REPL with Lisp-Stat loaded. Exiting from the REPL will exit the container.
+
+If you want to edit files with emacs use:
+
+```sh
+docker run --rm -it --user vscode -w /home/vscode ghcr.io/lisp-stat/ls-dev:latest
+```
+
 
 ## Building the image
 
