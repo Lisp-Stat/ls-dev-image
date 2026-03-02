@@ -85,21 +85,91 @@ sufficient for using and exploring Lisp-Stat, but you cannot push changes to the
 
 ### Setting up a contributor workspace
 
-When you are ready to contribute, authenticate with GitHub and run `ls-fork`:
+`ls-fork` clones your forks into `/workspaces/lisp-stat/`.  That directory must
+be backed by **persistent storage** so your work survives container rebuilds.
+After a rebuild, the container automatically re-links `~/quicklisp/local-projects/`
+to your surviving fork clones — no manual steps required.
+
+Choose the setup that matches your environment before running `ls-fork`:
+
+#### GitHub Codespaces
+
+`/workspaces` is automatically a persistent volume in Codespaces — no
+configuration needed.  Just authenticate and run:
 
 ```sh
 gh auth login
 ls-fork
 ```
 
-`ls-fork` does the following for every repo in `~/quicklisp/local-projects/`:
+#### VS Code Dev Containers
+
+Add a `mounts` entry to your `devcontainer.json` to attach persistent storage
+to `/workspaces/lisp-stat`, then rebuild the container before running `ls-fork`.
+
+**Named Docker volume** (recommended — no host-side setup):
+
+```jsonc
+{
+  "image": "ghcr.io/lisp-stat/ls-dev:latest",
+  "mounts": [
+    "source=lisp-stat-forks,target=/workspaces/lisp-stat,type=volume"
+  ]
+}
+```
+
+**Host bind mount** (forks visible in your host filesystem):
+
+```jsonc
+{
+  "image": "ghcr.io/lisp-stat/ls-dev:latest",
+  "mounts": [
+    "source=${localWorkspaceFolder}/../lisp-stat,target=/workspaces/lisp-stat,type=bind,consistency=cached"
+  ]
+}
+```
+
+After adding the mount, **Rebuild Container**, then:
+
+```sh
+gh auth login
+ls-fork
+```
+
+#### Local `docker run`
+
+Pass a volume flag so `/workspaces/lisp-stat` persists between container runs:
+
+```sh
+# Named volume (simplest)
+docker run --rm -it --user vscode \
+  -v lisp-stat-forks:/workspaces/lisp-stat \
+  ghcr.io/lisp-stat/ls-dev:latest bash
+
+# Or bind to a host directory
+docker run --rm -it --user vscode \
+  -v ~/lisp-stat:/workspaces/lisp-stat \
+  ghcr.io/lisp-stat/ls-dev:latest bash
+```
+
+Then inside the container:
+
+```sh
+gh auth login
+ls-fork
+```
+
+Always pass the same `-v` flag on subsequent runs to access your fork clones.
+
+#### What `ls-fork` does
+
+For every repo in `~/quicklisp/local-projects/`:
 
 1. Forks the repo to your GitHub account (via `gh repo fork`)
-2. Clones your fork to `/workspaces/lisp-stat/<repo>` — this is a host bind
-   mount that **persists across container rebuilds**
+2. Clones your fork to `/workspaces/lisp-stat/<repo>` (on the persistent mount)
 3. Adds an `upstream` remote pointing back to the Lisp-Stat origin
 4. Replaces the in-container `~/quicklisp/local-projects/<repo>` directory with
-   a symlink to the new host-mount clone
+   a symlink to the fork clone
 
 After running `ls-fork`:
 
@@ -111,6 +181,13 @@ After running `ls-fork`:
 
 `ls-fork` is idempotent — repos already present in `/workspaces/lisp-stat/` are
 skipped, so it is safe to re-run if the process is interrupted.
+
+#### After a rebuild
+
+When the container is rebuilt or restarted, the startup scripts automatically
+re-link `~/quicklisp/local-projects/<repo>` to your fork clones on the
+persistent volume.  SBCL continues to load your fork code without any manual
+intervention.
 
 ### Keeping your forks up to date
 
