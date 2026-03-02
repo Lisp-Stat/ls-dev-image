@@ -2,7 +2,7 @@
   "name": "ls-dev",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "features": {
-    "ghcr.io/symbolics/devcontainer-features/sbcl:latest": {},
+    "ghcr.io/symbolics/devcontainer-features/sbcl:latest": {"make_slim": false},
     "ghcr.io/symbolics/devcontainer-features/quicklisp:latest": {},
     "ghcr.io/symbolics/devcontainer-features/aclrepl:latest": {},
     "ghcr.io/symbolics/devcontainer-features/ls-dev:latest": {"blas": "openblas"}
