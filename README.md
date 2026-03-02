@@ -31,8 +31,10 @@ this pre-built image to get fast container startup (no feature install phase):
 ## Run locally
 
 ```sh
-docker run --rm -it --user vscode ghcr.io/lisp-stat/ls-dev:latest sbcl
+docker run --rm -it --user vscode -w /home/vscode ghcr.io/lisp-stat/ls-dev:latest ls-repl
 ```
+
+This will give you a Common Lisp REPL with Lisp-Stat loaded.  If you want to edit files with emacs, exit the REPL (use Ctrl-d) and then type `emacs`.  Once running, type `M-x slime` to load the development environment.
 
 ## Building the image
 
@@ -72,7 +74,7 @@ creating a second `devcontainer.json` (e.g. in `.devcontainer-mkl/`) with
 
 ### Out of the box
 
-The upstream Lisp-Stat repositories are pre-cloned into
+The upstream Lisp-Stat repositories are cloned into
 `~/quicklisp/local-projects/` during the image build. SBCL and Lisp-Stat work
 immediately with no setup required:
 
