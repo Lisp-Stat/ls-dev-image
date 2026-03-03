@@ -92,13 +92,7 @@ creating a second `devcontainer.json` (e.g. in `.devcontainer-mkl/`) with
 
 The upstream Lisp-Stat repositories are cloned into
 `~/quicklisp/local-projects/` during the image build. SBCL and Lisp-Stat work
-immediately with no setup required:
-
-```sh
-sbcl --eval "(ql:quickload :lisp-stat)" --eval "(quit)"
-```
-
-The repos are read-only copies of the upstream Lisp-Stat organisation. They are
+are available no setup required. The repos are read-only copies of the upstream Lisp-Stat organisation. They are
 sufficient for using and exploring Lisp-Stat, but you cannot push changes to them.
 
 ### Setting up a contributor workspace
