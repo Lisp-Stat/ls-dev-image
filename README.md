@@ -42,6 +42,15 @@ If you want to edit files with emacs use:
 docker run --rm -it --user vscode -w /home/vscode ghcr.io/lisp-stat/ls-dev:latest
 ```
 
+## Read documentation
+
+The [lisp-stat](https://lisp-stat.dev/) website is available locally.  Use this to test your documentation additions or edits.  To start it the server:
+
+```sh
+cd ~/quicklisp/local-projects/documentation
+hugo server
+```
+This will start a webserver on the local host at port 1313 that you can connect to.  If you're running remotely, you'll probably want to use an SSH tunnel.  If running under VS Code, the port forwarding will happen automatically. (If running on VS Code or Code Spaces, the /workspaces directory will be automatically populated with the Lisp-Stat source).
 
 ## Building the image
 
