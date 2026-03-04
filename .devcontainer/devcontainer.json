@@ -1,10 +1,19 @@
 {
-  "name": "ls-dev",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
-  "features": {
-    "ghcr.io/symbolics/devcontainer-features/sbcl:latest": {},
-    "ghcr.io/symbolics/devcontainer-features/quicklisp:latest": {},
-    "ghcr.io/symbolics/devcontainer-features/aclrepl:latest": {},
-    "ghcr.io/symbolics/devcontainer-features/ls-dev:latest": {"blas": "openblas"}
+  "name": "ls-dev-image - Lisp-Stat Dev",
+  "image": "ghcr.io/lisp-stat/ls-dev:latest",
+  "containerUser": "vscode",
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.copilot",
+        "github.copilot-chat"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
   }
 }
