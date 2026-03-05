@@ -104,6 +104,8 @@ to your surviving fork clones — no manual steps required.
 
 Choose the setup that matches your environment before running `ls-fork`:
 
+`link-local-projects` script will create symlinks from the repositories cloned above into your `/workspaces/lisp-stat/` folder.
+
 #### GitHub Codespaces
 
 `/workspaces` is automatically a persistent volume in Codespaces — no
