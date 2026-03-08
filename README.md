@@ -1,232 +1,381 @@
-# ls-dev Image
+<!-- PROJECT SHIELDS -->
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MS-PL License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
-An OCI image for Common Lisp development with [Lisp-Stat](https://lisp-stat.dev/).
+<!-- PROJECT LOGO -->
+<br />
+<p align="center">
+  <a href="https://github.com/Lisp-Stat/ls-dev-image">
+    <img src="https://lisp-stat.dev/images/stats-image.svg" alt="Logo" width="80" height="80">
+  </a>
+  <h3 align="center">Lisp-Stat Development Container</h3>
+  <p align="center">
+    An OCI container image for Common Lisp and Lisp-Stat development<br />
+    <a href="https://lisp-stat.dev/"><strong>Learn more at lisp-stat.dev »</strong></a><br />
+    <a href="https://github.com/Lisp-Stat/ls-dev-image/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/Lisp-Stat/ls-dev-image/issues">Request Feature</a>
+  </p>
+</p>
 
-Built from `mcr.microsoft.com/devcontainers/base:ubuntu-24.04` using
-[devcontainer features](https://containers.dev/features). The image includes:
+<!-- TABLE OF CONTENTS -->
+<details open="open">
+  <summary><h2 style="display: inline-block">Table of Contents</h2></summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About the Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#run-locally-with-docker">Run Locally with Docker</a></li>
+        <li><a href="#run-in-a-devcontainer">Run in a devcontainer</a></li>
+        <li><a href="#run-on-the-cloud">Run on the Cloud</a></li>
+      </ul>
+    </li>
+    <li><a href="#developer-workflow">Developer Workflow</a></li>
+    <li><a href="#building-an-image">Building an Image</a></li>
+    <li><a href="#resources">Resources</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</details>
 
-- **SBCL** – Steel Bank Common Lisp, built from source
-- **Quicklisp** – the de-facto package manager for Common Lisp
-- **ACLREPL** – enhanced REPL for SBCL
-- **Lisp-Stat** – statistical computing environment with OpenBLAS
+<!-- ABOUT THE PROJECT -->
+## About the Project
 
-The published image is at:
+This repository provides a ready-to-use, containerized development environment for Common Lisp using [Lisp-Stat](https://lisp-stat.dev/) and SBCL. It is ideal for:
+- Evaluating Lisp-Stat without local installation.
+- Quickly starting new Lisp-Stat projects in consistent, reproducible environments.
+- Contributing to Lisp-Stat and its ecosystem.
+
+It is suited for both **experimenters/learners** and **contributors**.
+
+### Built With
+
+* [SBCL](https://www.sbcl.org/) (Steel Bank Common Lisp)
+* [Quicklisp](https://www.quicklisp.org/)
+* [Lisp-Stat](https://lisp-stat.dev/)
+* [devcontainer Features](https://containers.dev/features)
+* [OpenBLAS](https://www.openblas.net/)
+* [Docker](https://www.docker.com/)
+* [VS Code Devcontainers](https://code.visualstudio.com/docs/devcontainers/containers)
+
+---
+
+## Getting Started
+
+A prebuilt image is published at:
 
 ```
 ghcr.io/lisp-stat/ls-dev:latest
 ```
 
-## Usage in a devcontainer
+You can use this image locally with Docker, in a Devcontainer, or in the Cloud (e.g. Codespaces).
 
-Instead of listing individual features, point your `devcontainer.json` directly at
-this pre-built image to get fast container startup (no feature install phase):
+Supported runtimes:
+- Docker (Linux/Mac/Windows)
+- Podman
+- containerd, Lima, Rancher Desktop, Colima  
+- VS Code Dev Containers
+- GitHub Codespaces
 
-```jsonc
-{
-  "name": "My Lisp-Stat Project",
-  "image": "ghcr.io/lisp-stat/ls-dev:latest"
-}
-```
+---
 
-## Run locally
+### Run Locally with Docker
 
-```sh
-docker run --rm -it --user vscode -w /home/vscode ghcr.io/lisp-stat/ls-dev:latest ls-repl
-```
+#### Quick Experimentation
 
-This will give you a Common Lisp REPL with Lisp-Stat loaded. Exiting from the REPL will exit the container.
+1. **Pull the latest image:**
 
-If you want to edit files with emacs use:
+   ```sh
+   docker pull ghcr.io/lisp-stat/ls-dev:latest
+   ```
 
-```sh
-docker run --rm -it --user vscode -w /home/vscode ghcr.io/lisp-stat/ls-dev:latest
-```
+2. **Start an interactive Lisp-Stat REPL:**
 
-## Read documentation
+   ```sh
+   docker run --rm -it --user vscode -w /home/vscode ghcr.io/lisp-stat/ls-dev:latest ls-repl
+   ```
 
-The [lisp-stat](https://lisp-stat.dev/) website is available locally.  Use this to test your documentation additions or edits.  To start it the server:
+   This provides you with a Lisp REPL in the container environment with Lisp-Stat configured and loaded.  From here you can experiment with Lisp-Stat or Common-Lisp (Lisp-Stat is a superset of Common Lisp).  If in future you wish to use only Common-Lisp, modify your `~/.sbclrc` file to remove the loading of `.ls-init.sh`.
 
-```sh
-cd ~/quicklisp/local-projects/documentation
-hugo server
-```
-This will start a webserver on the local host at port 1313 that you can connect to.  If you're running remotely, you'll probably want to use an SSH tunnel.  If running under VS Code, the port forwarding will happen automatically. (If running on VS Code or Code Spaces, the /workspaces directory will be automatically populated with the Lisp-Stat source).
+---
 
-## Building the image
+#### Setting Up a Persistent Development Workspace
 
-Building requires the [devcontainer CLI](https://github.com/devcontainers/cli).
-Standard `docker build` cannot be used because the image is composed from
-devcontainer features.
+To persist source code and settings between container restarts, use Docker volumes or bind mounts. This is essential if you want to do any code editing, save your work, or contribute changes.
 
-```sh
-npm install -g @devcontainers/cli
+##### Option A: Named Docker Volume (Recommended)
 
-# Build locally for testing
-devcontainer build --workspace-folder . --image-name ls-dev:latest
+1. **Create or reuse a named volume for Lisp-Stat developer workspace:**
 
-# Build and push to a registry
-devcontainer build --workspace-folder . --image-name ghcr.io/lisp-stat/ls-dev:latest --push
-```
+   ```sh
+   docker volume create lisp-stat-workspace
+   ```
 
-## Publishing
+2. **Start the container with persistent workspace:**
 
-The GitHub Actions workflow in `.github/workflows/publish.yml` builds and pushes
-the image automatically on every push to `main` and on version tags (`v*`).
+   ```sh
+   docker run --rm -it \
+     --user vscode \
+     -v lisp-stat-workspace:/workspaces/ls-dev \
+     ghcr.io/lisp-stat/ls-dev:latest bash
+   ```
 
-## Versioning
+##### Option B: Host Directory Mount
 
-| Tag | Description |
-|-----|-------------|
-| `latest` | Most recent build from `main` |
-| `1.0.0`, `1.1.0`, … | Pinned release builds (from `v*` git tags) |
+1. **Create a directory on your host for Lisp-Stat projects:**
+   ```sh
+   mkdir -p ~/lisp-stat-workspace
+   ```
 
-## BLAS variant
+2. **Start the container mounting this directory:**
+   ```sh
+   docker run --rm -it \
+     --user vscode \
+     -v ~/lisp-stat-workspace:/workspaces/ls-dev \
+     ghcr.io/lisp-stat/ls-dev:latest bash
+   ```
 
-This image bundles **OpenBLAS**. An Intel MKL variant can be produced by
-creating a second `devcontainer.json` (e.g. in `.devcontainer-mkl/`) with
-`"blas": "intel-mkl"` and tagging the resulting image `ls-dev:latest-mkl`.
+---
+
+#### (Optional) Pre-configure the Container with ls-init.sh
+
+The included **ls-init.sh** script sets up your developer workspace. You should run this INSIDE the container after starting it with a persistent workspace as above. See the [Developer Workflow](#developer-workflow) for details.
+
+---
+
+### Run in a Devcontainer
+
+If you use [Visual Studio Code](https://code.visualstudio.com/) or similar tools that support devcontainers, you can use the image directly.
+
+1. **Create a `devcontainer.json` file** in your project's root directory:
+
+   ```json
+   {
+     "name": "My Lisp-Stat Project",
+     "image": "ghcr.io/lisp-stat/ls-dev:latest",
+     "mounts": [
+       "source=lisp-stat-workspace,target=/workspaces/ls-dev,type=volume"
+     ]
+   }
+   ```
+
+2. **Open the folder in VS Code** and "Reopen in Container" when prompted.
+
+You can also use the [devcontainercli](https://code.visualstudio.com/docs/devcontainers/devcontainer-cli) as a docker replacement for working with these images.  This is our recommendation.
+---
+
+### Run on the Cloud (GitHub Codespaces)
+
+1. Go to your repository on GitHub.
+2. Click on the **Code** button and choose **"Open with Codespaces"**.
+3. Use the [devcontainer.json](#run-in-a-devcontainer) example above for the fastest start.
+4. Wait for the Codespace to initialize and you can begin using VS Code in the browser.
+
+---
 
 ## Developer Workflow
 
-### Out of the box
+This section focuses on helping **new developers** onboard, regardless of familiarity with Common Lisp, Docker, or GitHub. All essential setup is automated by the `ls-init.sh` script included in the image.
 
-The upstream Lisp-Stat repositories are cloned into
-`~/quicklisp/local-projects/` during the image build. SBCL and Lisp-Stat work
-are available no setup required. The repos are read-only copies of the upstream Lisp-Stat organisation. They are
-sufficient for using and exploring Lisp-Stat, but you cannot push changes to them.
+> **There are two main modes:**
+> - **Experimenter**: Want to try out/dev or learn? Get read-only access to all Lisp-Stat software with no need to set up GitHub.
+> - **Contributor**: Want to contribute and submit pull requests? Fork, clone, and set up your workspace for development and PRs on GitHub.
 
-### Setting up a contributor workspace
+### 1. Open Your Container
 
-`ls-fork` clones your forks into `/workspaces/lisp-stat/`.  That directory must
-be backed by **persistent storage** so your work survives container rebuilds.
-After a rebuild, the container automatically re-links `~/quicklisp/local-projects/`
-to your surviving fork clones — no manual steps required.
+Start the container using one of the methods above:
+- Docker (with a persistent volume or directory, see "Run Locally")
+- VS Code Devcontainer
+- Codespaces
 
-Choose the setup that matches your environment before running `ls-fork`:
+> For all modes, commands below should be run **inside the container shell as the vscode user**.
 
-`link-local-projects` script will create symlinks from the repositories cloned above into your `/workspaces/lisp-stat/` folder.
+---
 
-#### GitHub Codespaces
+### 2. Set Up Your Development Environment with ls-init.sh
 
-`/workspaces` is automatically a persistent volume in Codespaces — no
-configuration needed.  Just authenticate and run:
+#### About `ls-init.sh`
 
-```sh
-gh auth login
-ls-fork
-```
+`ls-init.sh` sets up your Lisp-Stat workspace in two ways:
 
-#### VS Code Dev Containers
+- **Experimenter mode** (default): Clones official Lisp-Stat repositories to a workspace directory (e.g., `/workspaces/ls-dev`), making them available read-only. Safe, fast, and ideal for exploring or learning.
+- **Contributor mode**: Forks the official repositories to your GitHub account and clones your forks to your workspace (e.g., `/workspaces/ls-dev`) so you can commit and push changes, submit PRs, and track upstream changes.
 
-Add a `mounts` entry to your `devcontainer.json` to attach persistent storage
-to `/workspaces/lisp-stat`, then rebuild the container before running `ls-fork`.
+#### Prerequisites (for Contributor mode only)
 
-**Named Docker volume** (recommended — no host-side setup):
+- You must have [GitHub CLI (`gh`)](https://cli.github.com/) installed in the container (preinstalled in image).
+- You must be authenticated to GitHub:  
+  ```
+  gh auth login
+  ```
 
-```jsonc
-{
-  "image": "ghcr.io/lisp-stat/ls-dev:latest",
-  "mounts": [
-    "source=lisp-stat-forks,target=/workspaces/lisp-stat,type=volume"
-  ]
-}
-```
+---
 
-**Host bind mount** (forks visible in your host filesystem):
+#### Experimenter Workflow: Fastest Start without GitHub
 
-```jsonc
-{
-  "image": "ghcr.io/lisp-stat/ls-dev:latest",
-  "mounts": [
-    "source=${localWorkspaceFolder}/../lisp-stat,target=/workspaces/lisp-stat,type=bind,consistency=cached"
-  ]
-}
-```
+1. **(Inside container) Run ls-init.sh in experimenter mode (default):**
 
-After adding the mount, **Rebuild Container**, then:
+   ```sh
+   ./ls-init.sh
+   ```
 
-```sh
-gh auth login
-ls-fork
-```
+   Or, explicitly:
 
-#### Local `docker run`
+   ```sh
+   ./ls-init.sh --mode experimenter
+   ```
 
-Pass a volume flag so `/workspaces/lisp-stat` persists between container runs:
+   - This clones the latest official Lisp-Stat repositories to `/workspaces/ls-dev-upstream` (or `$HOME/lisp-stat-upstream`), then symlinks them into:
+     - `/workspaces/ls-dev` (your workspace mount for editor access)
+     - `~/quicklisp/local-projects` (so SBCL/Quicklisp can discover them)
+
+   - **You can immediately open and work with all Lisp-Stat source code.**
+   - Code is **read-only** with respect to pushing changes upstream or submitting PRs.
+
+**To update to the latest upstream after a while:**
 
 ```sh
-# Named volume (simplest)
-docker run --rm -it --user vscode \
-  -v lisp-stat-forks:/workspaces/lisp-stat \
-  ghcr.io/lisp-stat/ls-dev:latest bash
-
-# Or bind to a host directory
-docker run --rm -it --user vscode \
-  -v ~/lisp-stat:/workspaces/lisp-stat \
-  ghcr.io/lisp-stat/ls-dev:latest bash
+./ls-init.sh --mode experimenter --refresh
 ```
+This fetches and updates all repos to their newest state.
 
-Then inside the container:
+---
+
+#### Contributor Workflow: Fork, Edit, and Submit Pull Requests
+
+1. **Authenticate to GitHub (if not already):**
+
+   ```sh
+   gh auth login
+   ```
+
+2. **Run ls-init.sh in contributor mode:**
+
+   ```sh
+   ./ls-init.sh --mode contributor
+   ```
+
+   - This does all experimenter steps BUT
+     - Forks each Lisp-Stat repo to your GitHub account (using the `gh` command).
+     - Clones your forks to `/workspaces/ls-dev` (the persistent workspace).
+     - Adds the official Lisp-Stat repo as `upstream` so you can stay up-to-date.
+     - Symlinks all your clones into `~/quicklisp/local-projects` (so Lisp can load your forks by default).
+
+   - Now, any edits you make are in your own GitHub fork. You can commit, push, and create pull requests directly.
+
+---
+
+#### Workflow Quick Reference Table
+
+| Mode           | Workspace source            | Pushing changes           | PRs?     | Suitable for                  |
+|----------------|----------------------------|---------------------------|----------|-------------------------------|
+| Experimenter   | Official repos (read-only) | No                        | No       | Exploration, learning         |
+| Contributor    | Your GitHub forks (w/upstream) | Yes                     | Yes      | Active development, contributing |
+
+**To switch modes later:**  
+You can always re-run ls-init.sh in contributor mode later to become a contributor.
+
+---
+
+##### What Gets Set Up
+
+- `/workspaces/ls-dev/<repo>`: Your working tree (fork or upstream clone)
+- `~/quicklisp/local-projects/<repo>`: Symlink to above (for SBCL/Quicklisp)
+- For contributors: `origin` remote is your fork, `upstream` is the official repo.
+
+---
+
+#### Example: Full Contributing Process (Step-by-Step)
+
+1. **Start the container with a persistent workspace.**
+2. **Inside the container:**
+    ```sh
+    gh auth login         # if needed
+    ./ls-init.sh --mode contributor
+    ```
+3. **Make and commit code changes:**
+    ```sh
+    cd /workspaces/ls-dev/data-frame
+    git checkout -b my-cool-feature
+    # ...edit/code/test...
+    git add .
+    git commit -m "Add my cool feature"
+    git push origin my-cool-feature
+    ```
+
+4. **Open a pull request on GitHub as usual.**
+5. **To update your fork with latest from upstream:**
+    ```sh
+    git fetch upstream
+    git merge upstream/master
+    git push origin master
+    ```
+
+---
+
+## Building an Image
+
+To customize or rebuild the image yourself, you need the [devcontainer CLI](https://github.com/devcontainers/cli):
 
 ```sh
-gh auth login
-ls-fork
+npm install -g @devcontainers/cli
+devcontainer build --workspace-folder . --image-name my-ls-dev:latest
 ```
 
-Always pass the same `-v` flag on subsequent runs to access your fork clones.
-
-#### What `ls-fork` does
-
-For every repo in `~/quicklisp/local-projects/`:
-
-1. Forks the repo to your GitHub account (via `gh repo fork`)
-2. Clones your fork to `/workspaces/lisp-stat/<repo>` (on the persistent mount)
-3. Adds an `upstream` remote pointing back to the Lisp-Stat origin
-4. Replaces the in-container `~/quicklisp/local-projects/<repo>` directory with
-   a symlink to the fork clone
-
-After running `ls-fork`:
-
-| Location | Remote | Purpose |
-|---|---|---|
-| `/workspaces/lisp-stat/<repo>` | `origin` → your fork | Push your changes here |
-| `/workspaces/lisp-stat/<repo>` | `upstream` → Lisp-Stat | Fetch official updates |
-| `~/quicklisp/local-projects/<repo>` | symlink → above | SBCL/Quicklisp load path |
-
-`ls-fork` is idempotent — repos already present in `/workspaces/lisp-stat/` are
-skipped, so it is safe to re-run if the process is interrupted.
-
-#### After a rebuild
-
-When the container is rebuilt or restarted, the startup scripts automatically
-re-link `~/quicklisp/local-projects/<repo>` to your fork clones on the
-persistent volume.  SBCL continues to load your fork code without any manual
-intervention.
-
-### Keeping your forks up to date
-
+To push to a registry:
 ```sh
-cd /workspaces/lisp-stat/<repo>
-git fetch upstream
-git merge upstream/master
+devcontainer build --workspace-folder . --image-name ghcr.io/youruser/ls-dev:latest --push
 ```
 
-Or for all repos at once:
+Standard `docker build` is not supported (due to devcontainer features composition).
 
-```sh
-for repo in /workspaces/lisp-stat/*/; do
-  echo "Updating $(basename $repo)..."
-  git -C "$repo" fetch upstream
-  git -C "$repo" merge upstream/master
-done
-```
+---
 
 ## Resources
 
-- [Lisp-Stat](https://lisp-stat.dev/)
+- [Lisp-Stat Documentation](https://lisp-stat.dev/)
 - [devcontainer features source](https://github.com/Symbolics/devcontainer-features)
-- [cl-jupyter-image](https://github.com/Lisp-Stat/cl-jupyter-image) – companion Jupyter image
+- [cl-jupyter-image](https://github.com/Lisp-Stat/cl-jupyter-image)
+
+---
+
+## Contributing
+
+Contributions are welcome—see [CONTRIBUTING](CONTRIBUTING.md) for guidelines.
+
+---
 
 ## License
 
-MS-PL
+Distributed under the MS-PL License. See [LICENSE](LICENSE) for details.
+
+---
+
+## Contact
+
+Project Link: [https://github.com/Lisp-Stat/ls-dev-image](https://github.com/Lisp-Stat/ls-dev-image)
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[contributors-shield]: https://img.shields.io/github/contributors/Lisp-Stat/ls-dev-image.svg?style=for-the-badge
+[contributors-url]: https://github.com/Lisp-Stat/ls-dev-image/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Lisp-Stat/ls-dev-image.svg?style=for-the-badge
+[forks-url]: https://github.com/Lisp-Stat/ls-dev-image/network/members
+[stars-shield]: https://img.shields.io/github/stars/Lisp-Stat/ls-dev-image.svg?style=for-the-badge
+[stars-url]: https://github.com/Lisp-Stat/ls-dev-image/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Lisp-Stat/ls-dev-image.svg?style=for-the-badge
+[issues-url]: https://github.com/Lisp-Stat/ls-dev-image/issues
+[license-shield]: https://img.shields.io/github/license/Lisp-Stat/ls-dev-image.svg?style=for-the-badge
+[license-url]: https://github.com/Lisp-Stat/ls-dev-image/blob/master/LICENSE
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/company/symbolics/
