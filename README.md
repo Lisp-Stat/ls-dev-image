@@ -52,7 +52,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About the Project
 
-This repository provides a ready-to-use, containerized development environment for Common Lisp using [Lisp-Stat](https://lisp-stat.dev/) and SBCL. It is ideal for:
+This repository provides a ready-to-use, containerized development environment for Common Lisp and [Lisp-Stat](https://lisp-stat.dev/). It is ideal for:
 - Evaluating Lisp-Stat without local installation.
 - Quickly starting new Lisp-Stat projects in consistent, reproducible environments.
 - Contributing to Lisp-Stat and its ecosystem.
@@ -103,11 +103,47 @@ Supported runtimes:
 2. **Start an interactive Lisp-Stat REPL:**
 
    ```sh
-   docker run --rm -it --user vscode -w /home/vscode ghcr.io/lisp-stat/ls-dev:latest ls-repl
+   docker run --rm -it --user vscode -w /home/vscode ghcr.io/lisp-stat/ls-dev:latest /bin/bash -c "ls-init.sh --mode developer && ls-repl"
    ```
 
-   This provides you with a Lisp REPL in the container environment with Lisp-Stat configured and loaded.  From here you can experiment with Lisp-Stat or Common-Lisp (Lisp-Stat is a superset of Common Lisp).  If in future you wish to use only Common-Lisp, modify your `~/.sbclrc` file to remove the loading of `.ls-init.sh`.
+   This will start a script that will ask you how to proceed:
 
+   ```sh
+   [ls-init.sh] SHELL: /bin/bash                  
+   [ls-init.sh] Bash version: 5.2.21(1)-release   
+   [ls-init.sh] Args: --mode developer            
+   [ls-init.sh] TTY: /dev/pts/0                   
+   HOME=/home/vscode                              
+   PWD=/home/vscode                               
+   SHLVL=2                                        
+   TERM=xterm                                     
+   Select setup mode:                             
+   1) Experimenter (default, upstream only)       
+   2) Contributor (fork and relink)               
+   #?
+   ```                                          
+  Choose your option and the script will configure and compile the source and start a Lisp-Stat REPL. From here you can experiment with Lisp-Stat or Common-Lisp (Lisp-Stat is a superset of Common Lisp).  If in future you wish to use only Common-Lisp, modify your `~/.sbclrc` file to remove the loading of `.ls-init.sh`.
+
+  When you start `ls-repl`, the ~/.ls-init.lisp file configures lisp-stat to load a few data sets, like `mtcars`, and also configures an instance of [ls-server](https://github.com/Lisp-Stat/ls-server) on port 20202 by default.  Data frames and plots that you create will show up in this web interface, and you can edit the data-frames from there in an excel like interface.  You must have port forwarding configured for your container, after which you can open http://localhost:20202.
+
+<img width="1038" height="704" alt="image" src="https://github.com/user-attachments/assets/98c0e707-b259-48e4-93c1-1ba7f62e3f09" />
+
+#### Editing Code
+Emacs and slime are also configured in this container.  This is the typical lisp coding environment.  To edit with emacs:
+
+1. Start your container with a shell:
+
+```sh
+docker run --rm -it --user vscode -w /home/vscode ghcr.io/lisp-stat/ls-dev:latest bash
+```
+
+2. Run `ls-init.sh` to obtain the source if you have not already done so
+3. From within the container, run `emacs`
+4. From emacs, run `M-x slime` (the 'M' stands for the 'Meta' key, and is often Alt in PC style keyboards)
+
+<img width="1306" height="762" alt="image" src="https://github.com/user-attachments/assets/1abaeea4-1bee-494b-9dd4-c590c9a66f5c" />
+
+  
 ---
 
 #### Setting Up a Persistent Development Workspace
@@ -170,7 +206,7 @@ If you use [Visual Studio Code](https://code.visualstudio.com/) or similar tools
    }
    ```
 
-2. **Open the folder in VS Code** and "Reopen in Container" when prompted.
+2. Open the folder in VS Code and "Reopen in Container" when prompted.
 
 You can also use the [devcontainercli](https://code.visualstudio.com/docs/devcontainers/devcontainer-cli) as a docker replacement for working with these images.  This is our recommendation.
 ---
@@ -227,16 +263,16 @@ Start the container using one of the methods above:
 1. **(Inside container) Run ls-init.sh in experimenter mode (default):**
 
    ```sh
-   ./ls-init.sh
+   /usr/local/bin/ls-init.sh
    ```
 
    Or, explicitly:
 
    ```sh
-   ./ls-init.sh --mode experimenter
+   /ls-init.sh --mode experimenter
    ```
 
-   - This clones the latest official Lisp-Stat repositories to `/workspaces/ls-dev-upstream` (or `$HOME/lisp-stat-upstream`), then symlinks them into:
+   - This clones the latest official Lisp-Stat repositories to `/workspaces/lisp-stat-upstream` (or `$HOME/lisp-stat-upstream`), then symlinks them into:
      - `/workspaces/ls-dev` (your workspace mount for editor access)
      - `~/quicklisp/local-projects` (so SBCL/Quicklisp can discover them)
 
@@ -246,7 +282,7 @@ Start the container using one of the methods above:
 **To update to the latest upstream after a while:**
 
 ```sh
-./ls-init.sh --mode experimenter --refresh
+ls-init.sh --mode experimenter --refresh
 ```
 This fetches and updates all repos to their newest state.
 
@@ -263,7 +299,7 @@ This fetches and updates all repos to their newest state.
 2. **Run ls-init.sh in contributor mode:**
 
    ```sh
-   ./ls-init.sh --mode contributor
+   ls-init.sh --mode contributor
    ```
 
    - This does all experimenter steps BUT
@@ -302,7 +338,7 @@ You can always re-run ls-init.sh in contributor mode later to become a contribut
 2. **Inside the container:**
     ```sh
     gh auth login         # if needed
-    ./ls-init.sh --mode contributor
+    ls-init.sh --mode contributor
     ```
 3. **Make and commit code changes:**
     ```sh
